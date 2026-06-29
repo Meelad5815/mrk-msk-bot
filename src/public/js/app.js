@@ -1,3 +1,4 @@
+const socket = typeof io === 'function' ? io() : { on: () => {}, emit: () => {} };
 const socket = io();
 const $ = (id) => document.getElementById(id);
 let token = localStorage.getItem('token') || '';
