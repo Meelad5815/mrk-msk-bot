@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    ports: ["3000:3000"]
+    env_file: .env
+    depends_on: [mongo]
+    volumes:
+      - ./sessions:/app/sessions
+      - ./logs:/app/logs
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+volumes:
+  mongo_data:
