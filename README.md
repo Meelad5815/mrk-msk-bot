@@ -76,6 +76,7 @@ Default development credentials come from `.env.example` and should be changed b
 - **Docker:** use the included `Dockerfile` and `docker-compose.yml`.
 - **Railway/Render:** create a Node service, add MongoDB, configure environment variables, and persist `sessions/` with a volume when available.
 - **Vercel:** supported as a crash-safe dashboard/static preview through `api/index.js` and `vercel.json`. The Vercel handler intentionally returns `503` for live bot APIs because WhatsApp sockets and Baileys auth require a long-running Node process plus durable session storage. Deploy the production bot on VPS, Docker, Railway, or Render for live WhatsApp connectivity.
+- **Vercel:** supported for the dashboard and API preview through `api/index.js` and `vercel.json`; configure `MONGODB_URI` in Vercel environment variables. WhatsApp sockets need a long-running server/volume for reliable production use, so deploy the bot worker on VPS, Docker, Railway, or Render for live WhatsApp connectivity.
 
 ## Disclaimer
 

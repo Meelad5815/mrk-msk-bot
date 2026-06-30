@@ -27,6 +27,11 @@ function createSessionStore() {
 
 function createApp(io = { emit: () => {} }) {
   const app = express();
+async function bootstrap() {
+  await connectDatabase();
+  const app = express();
+  const server = http.createServer(app);
+  const io = new Server(server, { cors: { origin: env.appUrl, credentials: true } });
   app.set('io', io);
   app.use(helmet({ contentSecurityPolicy: false }));
   app.use(compression());
@@ -39,6 +44,10 @@ function createApp(io = { emit: () => {} }) {
   app.use(csrf({ cookie: { httpOnly: true, sameSite: 'strict', secure: env.nodeEnv === 'production' } }));
   app.get('/api/csrf-token', (req, res) => res.json({ csrfToken: req.csrfToken() }));
   app.get('/socket.io/socket.io.js', (req, res) => res.type('application/javascript').send('window.io = window.io || undefined;'));
+  app.use(session({ secret: env.sessionSecret, resave: false, saveUninitialized: false, store: MongoStore.create({ mongoUrl: env.mongoUri }), cookie: { httpOnly: true, sameSite: 'strict', secure: env.nodeEnv === 'production' } }));
+  app.use(rateLimit({ windowMs: 60_000, max: 120 }));
+  app.use(csrf({ cookie: { httpOnly: true, sameSite: 'strict', secure: env.nodeEnv === 'production' } }));
+  app.get('/api/csrf-token', (req, res) => res.json({ csrfToken: req.csrfToken() }));
   app.use(express.static(path.join(__dirname, 'public')));
   app.use('/api/auth', authRoutes);
   app.use('/api', apiRoutes);
@@ -61,3 +70,4 @@ if (require.main === module) {
 }
 
 module.exports = { createApp, bootstrap, isServerlessRuntime };
+bootstrap().catch((error) => { logger.error(error, 'Failed to boot application'); process.exit(1); });
